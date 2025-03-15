@@ -1,0 +1,1 @@
+- Dijkstra's original paper on the Dining Philosophers problem
