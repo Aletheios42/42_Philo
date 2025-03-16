@@ -1,5 +1,4 @@
 #include "../Inc/philo.h"
-#include <pthread.h>
 
 void print_error(const char *error) {
   printf("%s\n", error);
@@ -8,55 +7,89 @@ void print_error(const char *error) {
 
 bool parser(t_input *input, char **av, int ac) {
   input->philosophers = ft_philo_atol(av[1]);
-  if (input->philosophers == -1)
-    return (0);
+  if (input->philosophers <= 0)
+    return (false);
+
   input->time_to_die = ft_philo_atol(av[2]);
-  if (input->time_to_die == -1)
-    return (0);
+  if (input->time_to_die <= 0)
+    return (false);
+
   input->time_to_eat = ft_philo_atol(av[3]);
-  if (input->time_to_eat == -1)
-    return (0);
+  if (input->time_to_eat <= 0)
+    return (false);
+
   input->time_to_sleep = ft_philo_atol(av[4]);
-  if (input->time_to_sleep == -1)
-    return (0);
-  if (ac == 5)
-    input->meals_cap = 0;
-  else if (ac == 6) {
+  if (input->time_to_sleep <= 0)
+    return (false);
+
+  if (ac == 6) {
     input->meals_cap = ft_philo_atol(av[5]);
-    if (input->meals_cap == -1)
-      return (0);
+    if (input->meals_cap <= 0)
+      return (false);
+  } else {
+    input->meals_cap = 0;
   }
-  return (1);
-}
 
-void forge_forks(t_fork *forks, int nbr) {
-  int i;
-
-  i = -1;
-  while (++i < nbr) {
-    pthread_create(forks->fork, NULL, NULL, NULL);
-  }
-}
-
-void *lifecicle(t_philo philo) {
-  to_eat();
-  to_thinnk();
-  to_sleep();
+  return (true);
 }
 
 int main(int ac, char **av) {
   t_input input;
-  t_philo philos;
-  t_fork forks;
+  t_philo *philos = NULL;
+  t_fork *forks = NULL;
 
-  if (ac == 5 || ac == 6) {
-    if (!parser(&input, av, ac))
-      print_error("Bad Syntax");
+  pthread_mutex_t print;
+  bool simulation_end = false;
+  pthread_mutex_t end_mutex;
+
+  if (ac != 5 && ac != 6) {
+    print_error("Usage: ./philo number_of_philosophers time_to_die time_to_eat "
+                "time_to_sleep [number_of_times_each_philosopher_must_eat]");
+    return (1);
   }
-  forge_forks(forks, input.philosophers);
-  int i = -1;
-  while (++i < input.philosophers) {
-    pthread_create(input.philosophers, NULL, life_cicle(), philos);
+
+  if (!parser(&input, av, ac))
+    print_error("Invalid input parameters");
+
+  // Initialize mutexes
+  pthread_mutex_init(&print, NULL);
+  pthread_mutex_init(&end_mutex, NULL);
+
+  // Create forks
+  create_forks(&forks, input.philosophers);
+
+  // Create philosophers
+  create_philosophers(&philos, forks, &input, &print);
+
+  // Set simulation end flag for all philosophers
+  for (int i = 0; i < input.philosophers; i++) {
+    philos[i].simulation_end = &simulation_end;
+    philos[i].end_mutex = &end_mutex;
   }
+
+  // Initialize last_meal_time for all philosophers
+  long start_time = get_current_time();
+  for (int i = 0; i < input.philosophers; i++) {
+    philos[i].last_meal_time = start_time;
+  }
+
+  // Start philosopher threads
+  for (int i = 0; i < input.philosophers; i++) {
+    if (pthread_create(&philos[i].thread, NULL, lifecycle, &philos[i]) != 0) {
+      print_error("Failed to create philosopher thread");
+    }
+  }
+
+  // Monitor philosophers for death
+  monitor_philos(philos, &input, &simulation_end, &end_mutex);
+
+  // Wait for philosopher threads to finish
+  for (int i = 0; i < input.philosophers; i++) {
+    pthread_join(philos[i].thread, NULL);
+  }
+
+  // Clean up resources
+  free_resources(philos, forks, &print, input.philosophers);
+
   return (0);
 }
