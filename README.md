@@ -14,3 +14,6 @@
    g. Repeat until full (if meals_cap specified)
 4. Monitor thread checks if any philosopher hasn't eaten in time_to_die ms
 5. Clean up mutexes and threads when simulation ends
+
+lldb thread
+semaforo como IPC

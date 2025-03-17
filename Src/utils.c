@@ -3,34 +3,24 @@
 long ft_philo_atol(char *nbr) {
   long result = 0;
   int i = 0;
+  int sign = 1;
 
-  // Skip whitespace
   while (nbr[i] == ' ' || (nbr[i] >= 9 && nbr[i] <= 13))
     i++;
-
-  // Check for sign
-  int sign = 1;
   if (nbr[i] == '-' || nbr[i] == '+') {
     if (nbr[i] == '-')
       sign = -1;
     i++;
   }
-
-  // Convert digits
   while (nbr[i] >= '0' && nbr[i] <= '9') {
     result = result * 10 + (nbr[i] - '0');
     i++;
-
-    // Check for overflow
     if ((sign == 1 && result > INT_MAX) ||
         (sign == -1 && result * sign < INT_MIN))
       return (-1);
   }
-
-  // Check for invalid characters
   if (nbr[i] != '\0')
     return (-1);
-
   return (result * sign);
 }
 

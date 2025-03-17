@@ -34,10 +34,10 @@ bool parser(t_input *input, char **av, int ac) {
 }
 
 int main(int ac, char **av) {
+  int i;
   t_input input;
   t_philo *philos = NULL;
   t_fork *forks = NULL;
-
   pthread_mutex_t print;
   bool simulation_end = false;
   pthread_mutex_t end_mutex;
@@ -62,19 +62,21 @@ int main(int ac, char **av) {
   create_philosophers(&philos, forks, &input, &print);
 
   // Set simulation end flag for all philosophers
-  for (int i = 0; i < input.philosophers; i++) {
+  i = -1;
+  while (++i < input.philosophers) {
     philos[i].simulation_end = &simulation_end;
     philos[i].end_mutex = &end_mutex;
   }
 
   // Initialize last_meal_time for all philosophers
   long start_time = get_current_time();
-  for (int i = 0; i < input.philosophers; i++) {
+  i = -1;
+  while (++i < input.philosophers)
     philos[i].last_meal_time = start_time;
-  }
 
   // Start philosopher threads
-  for (int i = 0; i < input.philosophers; i++) {
+  i = -1;
+  while (++i < input.philosophers) {
     if (pthread_create(&philos[i].thread, NULL, lifecycle, &philos[i]) != 0) {
       print_error("Failed to create philosopher thread");
     }
@@ -84,9 +86,9 @@ int main(int ac, char **av) {
   monitor_philos(philos, &input, &simulation_end, &end_mutex);
 
   // Wait for philosopher threads to finish
-  for (int i = 0; i < input.philosophers; i++) {
+  i = -1;
+  while (++i < input.philosophers)
     pthread_join(philos[i].thread, NULL);
-  }
 
   // Clean up resources
   free_resources(philos, forks, &print, input.philosophers);
