@@ -68,12 +68,12 @@ int main(int ac, char **av) {
   if (!parser(&input, av, ac))
     print_error("Invalid input parameters");
 
+  // Create forks
+  create_forks(&forks, input.philosophers);
+
   // Initialize mutexes
   pthread_mutex_init(&print, NULL);
   pthread_mutex_init(&end.end_mutex, NULL);
-
-  // Create forks
-  create_forks(&forks, input.philosophers);
 
   // Create philosophers
   create_philosophers(&philos, forks, &input, &print, &end);
