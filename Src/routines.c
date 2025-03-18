@@ -1,182 +1,67 @@
 #include "../Inc/philo.h"
 
-void create_forks(t_fork **forks, int nbr) {
-  int i;
-  t_fork *first = NULL;
-  t_fork *current = NULL;
-  t_fork *prev = NULL;
+bool to_eat(t_philo *philo) {
+  if (philo->id % 2 == 1) {
+    pthread_mutex_lock(&philo->left_fork->mutex);
+    print_status(philo, "has taken a fork");
+    pthread_mutex_lock(&philo->right_fork->mutex);
+    print_status(philo, "has taken a fork");
+  } else {
+    pthread_mutex_lock(&philo->right_fork->mutex);
+    print_status(philo, "has taken a fork");
 
-  *forks = NULL;
-  i = -1;
-  while (++i < nbr) {
-    current = (t_fork *)malloc(sizeof(t_fork));
-    if (!current) {
-      print_error("Failed to allocate memory for fork");
-    }
-    pthread_mutex_init(&current->mutex, NULL);
-    current->id = i + 1;
-    current->next = NULL;
-
-    if (!*forks) {
-      *forks = current;
-      first = current;
-    } else {
-      prev->next = current;
-    }
-    prev = current;
+    pthread_mutex_lock(&philo->left_fork->mutex);
+    print_status(philo, "has taken a fork");
   }
-  if (current)
-    current->next = first;
+
+  print_status(philo, "is eating");
+  philo->last_meal_time = get_current_time();
+  msleep(philo->params->time_to_eat);
+  philo->meals_counter++;
+
+  pthread_mutex_unlock(&philo->right_fork->mutex);
+  pthread_mutex_unlock(&philo->left_fork->mutex);
+
+  // Check if philosopher has eaten enough
+  if (philo->params->meals_cap > 0 &&
+      philo->meals_counter >= philo->params->meals_cap) {
+    return true; // Return true if meal cap reached
+  }
+  return false; // Continue otherwise
 }
 
-void create_philosophers(t_philo **philos, t_fork *forks, t_input *input,
-                         pthread_mutex_t *print) {
-  int i;
-  int j;
-
-  *philos = (t_philo *)malloc(sizeof(t_philo) * input->philosophers);
-  if (!*philos) {
-    print_error("Failed to allocate memory for philosophers");
-  }
-
-  // Initialize philosophers
-  i = -1;
-  while (++i < input->philosophers) {
-    (*philos)[i].id = i + 1;
-    (*philos)[i].meals_counter = 0;
-    (*philos)[i].last_meal_time = 0;
-    (*philos)[i].print_mutex = *print;
-    (*philos)[i].params = input;
-
-    t_fork *current = forks;
-    j = -1;
-    while (++j < i)
-      current = current->next;
-
-    (*philos)[i].left_fork = current;
-    (*philos)[i].right_fork = current->next;
-  }
+void to_sleep(t_philo *philo) {
+  print_status(philo, "is sleeping");
+  msleep(philo->params->time_to_sleep);
 }
 
-void free_resources(t_philo *philos, t_fork *forks, pthread_mutex_t *print,
-                    int n) {
-  int i;
-  t_fork *current;
-  t_fork *next;
+void to_think(t_philo *philo) { print_status(philo, "is thinking"); }
 
-  pthread_mutex_destroy(print);
-  if (philos) {
-    free(philos);
-  }
+bool should_exit(t_philo *philo) {
+  bool simulation_stopped;
+  pthread_mutex_lock(philo->end_mutex);
+  simulation_stopped = *philo->simulation_end;
+  pthread_mutex_unlock(philo->end_mutex);
 
-  if (forks) {
-    current = forks;
-    i = -1;
-    while (++i < n) {
-      next = current->next;
-      pthread_mutex_destroy(&current->mutex);
-      free(current);
-      current = next;
-      if (current == forks)
-        break;
-    }
-  }
+  return simulation_stopped;
 }
 
 void *lifecycle(void *arg) {
   t_philo *philo = (t_philo *)arg;
 
   // Stagger philosophers to prevent deadlock
-  // Odd-numbered philosophers start by thinking a bit
   if (philo->id % 2 != 0) {
-    print_status(philo, "is thinking");
+    to_think(philo);
     msleep(philo->params->time_to_eat / 2);
   }
 
-  while (1) {
-    bool simulation_stopped;
-    pthread_mutex_lock(philo->end_mutex);
-    simulation_stopped = *philo->simulation_end;
-    pthread_mutex_unlock(philo->end_mutex);
-    if (simulation_stopped)
+  while (!should_exit(philo)) {
+    if (to_eat(philo)) // Break if meal cap reached
       break;
 
-    pthread_mutex_lock(&philo->left_fork->mutex);
-    print_status(philo, "has taken a fork");
-
-    // Try to take right fork
-    pthread_mutex_lock(&philo->right_fork->mutex);
-    print_status(philo, "has taken a fork");
-
-    // Eating
-    print_status(philo, "is eating");
-    philo->last_meal_time = get_current_time();
-    msleep(philo->params->time_to_eat);
-    philo->meals_counter++;
-
-    // Release forks
-    pthread_mutex_unlock(&philo->right_fork->mutex);
-    pthread_mutex_unlock(&philo->left_fork->mutex);
-
-    // Check if philosopher has eaten enough
-    if (philo->params->meals_cap > 0 &&
-        philo->meals_counter >= philo->params->meals_cap) {
-      break;
-    }
-
-    // Sleeping
-    print_status(philo, "is sleeping");
-    msleep(philo->params->time_to_sleep);
-
-    // Thinking
-    print_status(philo, "is thinking");
+    to_sleep(philo);
+    to_think(philo);
   }
 
-  return (NULL);
-}
-
-int check_starvation(t_philo *philos, t_input *input, bool *simulation_end,
-                     pthread_mutex_t *end_mutex) {
-  int i;
-
-  i = -1;
-  while (++i < input->philosophers) {
-    // Check if philosopher has died
-    if (get_current_time() - philos[i].last_meal_time > input->time_to_die) {
-      // Set simulation end flag
-      pthread_mutex_lock(end_mutex);
-      *simulation_end = true;
-      pthread_mutex_unlock(end_mutex);
-
-      // Print death status
-      pthread_mutex_lock(&philos[i].print_mutex);
-      printf("%ld %d died\n", get_current_time(), philos[i].id);
-      pthread_mutex_unlock(&philos[i].print_mutex);
-      return 1;
-    }
-  }
-  return 0;
-}
-void monitor_philos(t_philo *philos, t_input *input, bool *simulation_end,
-                    pthread_mutex_t *end_mutex) {
-  int i;
-  int full_philos;
-
-  while (1) {
-    i = 0;
-    full_philos = 0;
-    check_starvation(philos, input, simulation_end, end_mutex);
-
-    if (input->meals_cap > 0 && philos[i].meals_counter >= input->meals_cap)
-      full_philos++;
-    i++;
-  }
-
-  if (input->meals_cap > 0 && full_philos == input->philosophers) {
-    pthread_mutex_lock(end_mutex);
-    *simulation_end = true;
-    pthread_mutex_unlock(end_mutex);
-    return;
-  }
-  usleep(1000);
+  return NULL;
 }

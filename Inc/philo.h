@@ -24,6 +24,11 @@ typedef struct s_fork {
   struct s_fork *next;
 } t_fork;
 
+typedef struct s_end {
+  pthread_mutex_t end_mutex;
+  bool simulation_end;
+} t_end;
+
 typedef struct s_philo {
   int id;
   pthread_t thread;
@@ -46,11 +51,12 @@ void print_status(t_philo *philo, const char *status);
 void *lifecycle(void *arg);
 void create_forks(t_fork **forks, int nbr);
 void create_philosophers(t_philo **philos, t_fork *forks, t_input *input,
-                         pthread_mutex_t *print);
+                         pthread_mutex_t *print, t_end *end);
 void free_resources(t_philo *philos, t_fork *forks, pthread_mutex_t *print,
                     int n);
-void monitor_philos(t_philo *philos, t_input *input, bool *simulation_end,
-                    pthread_mutex_t *end_mutex);
+void monitor_philos(t_philo *philos, t_input *input, t_end *end);
+
+int check_starvation(t_philo *philos, t_input *input, t_end *end);
 void msleep(long ms);
 
 #endif

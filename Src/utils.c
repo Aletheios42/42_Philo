@@ -32,24 +32,31 @@ long get_current_time(void) {
   return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
 }
 
-void print_status(t_philo *philo, const char *status) {
-  bool simulation_stopped;
-
-  pthread_mutex_lock(philo->end_mutex);
-  simulation_stopped = *philo->simulation_end;
-  pthread_mutex_unlock(philo->end_mutex);
-
-  if (!simulation_stopped) {
-    pthread_mutex_lock(&philo->print_mutex);
-    printf("%ld %d %s\n", get_current_time(), philo->id, status);
-    pthread_mutex_unlock(&philo->print_mutex);
-  }
-}
-
 void msleep(long ms) {
   long start_time = get_current_time();
 
   while (get_current_time() - start_time < ms) {
     usleep(500); // Sleep for 0.5ms to reduce CPU usage
   }
+}
+
+int check_starvation(t_philo *philos, t_input *input, t_end *end) {
+
+  int i;
+  i = -1;
+  while (++i < input->philosophers) {
+    // Check if philosopher has died
+    if (get_current_time() - philos[i].last_meal_time > input->time_to_die) {
+      // Set simulation end flag
+      pthread_mutex_lock(&(end->end_mutex));
+      end->simulation_end = true;
+      pthread_mutex_unlock(&(end->end_mutex));
+      // Print death status
+      pthread_mutex_lock(&philos[i].print_mutex);
+      printf("%ld %d died\n", get_current_time(), philos[i].id);
+      pthread_mutex_unlock(&philos[i].print_mutex);
+      return 1;
+    }
+  }
+  return 0;
 }

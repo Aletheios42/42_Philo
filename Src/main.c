@@ -1,10 +1,29 @@
 #include "../Inc/philo.h"
 
-void print_error(const char *error) {
-  printf("%s\n", error);
-  exit(1);
-}
+void monitor_philos(t_philo *philos, t_input *input, t_end *end) {
 
+  int i;
+  int full_philos;
+
+  while (1) {
+    i = 0;
+    full_philos = 0;
+    if (check_starvation(philos, input, end))
+      return;
+
+    if (input->meals_cap > 0 && philos[i].meals_counter >= input->meals_cap)
+      full_philos++;
+    i++;
+  }
+
+  if (input->meals_cap > 0 && full_philos == input->philosophers) {
+    pthread_mutex_lock(&(end->end_mutex));
+    end->simulation_end = true;
+    pthread_mutex_unlock(&(end->end_mutex));
+    return;
+  }
+  usleep(1000);
+}
 bool parser(t_input *input, char **av, int ac) {
   input->philosophers = ft_philo_atol(av[1]);
   if (input->philosophers <= 0)
@@ -29,7 +48,6 @@ bool parser(t_input *input, char **av, int ac) {
   } else {
     input->meals_cap = 0;
   }
-
   return (true);
 }
 
@@ -39,8 +57,7 @@ int main(int ac, char **av) {
   t_philo *philos = NULL;
   t_fork *forks = NULL;
   pthread_mutex_t print;
-  bool simulation_end = false;
-  pthread_mutex_t end_mutex;
+  t_end end;
 
   if (ac != 5 && ac != 6) {
     print_error("Usage: ./philo number_of_philosophers time_to_die time_to_eat "
@@ -53,20 +70,13 @@ int main(int ac, char **av) {
 
   // Initialize mutexes
   pthread_mutex_init(&print, NULL);
-  pthread_mutex_init(&end_mutex, NULL);
+  pthread_mutex_init(&end.end_mutex, NULL);
 
   // Create forks
   create_forks(&forks, input.philosophers);
 
   // Create philosophers
-  create_philosophers(&philos, forks, &input, &print);
-
-  // Set simulation end flag for all philosophers
-  i = -1;
-  while (++i < input.philosophers) {
-    philos[i].simulation_end = &simulation_end;
-    philos[i].end_mutex = &end_mutex;
-  }
+  create_philosophers(&philos, forks, &input, &print, &end);
 
   // Initialize last_meal_time for all philosophers
   long start_time = get_current_time();
@@ -83,7 +93,7 @@ int main(int ac, char **av) {
   }
 
   // Monitor philosophers for death
-  monitor_philos(philos, &input, &simulation_end, &end_mutex);
+  monitor_philos(philos, &input, &end);
 
   // Wait for philosopher threads to finish
   i = -1;

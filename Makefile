@@ -5,9 +5,12 @@ C_FLAGS = -Werror -Wextra -Wall -g3
 C_FLAGS += -fsanitize=address
 
 
-SRC_FILES = main.c \
-	    routines.c \
-	    utils.c	\
+SRC_FILES = main.c		\
+	    routines.c		\
+	    init-free.c		\
+	    print.c		\
+	    utils.c		\
+
 
 SOURCES = $(addprefix Src/, $(SRC_FILES))
 OBJECTS = $(SOURCES:.c=.o)
