@@ -27,23 +27,16 @@ void monitor_philos(t_philo *philos, t_input *input, t_end *end) {
   int full_philos;
 
   while (1) {
-    // Verificar si algún filósofo murió de hambre
     if (check_starvation(philos, input, end))
       return;
-    // Solo comprueba si todos han comido lo suficiente si hay un límite de
-    // comidas
-    if (input->meals_cap > 0) {
-      i = 0;
-      full_philos = 0;
 
-      // Recorrer TODOS los filósofos
-      while (i < input->philosophers) {
+    if (input->meals_cap > 0) {
+      full_philos = 0;
+      for (i = 0; i < input->philosophers; i++) {
         if (philos[i].meals_counter >= input->meals_cap)
           full_philos++;
-        i++;
       }
 
-      // Si todos han comido lo suficiente, terminar simulación
       if (full_philos == input->philosophers) {
         pthread_mutex_lock(&(end->end_mutex));
         end->simulation_end = true;
@@ -51,5 +44,6 @@ void monitor_philos(t_philo *philos, t_input *input, t_end *end) {
         return;
       }
     }
+    usleep(1000); // Añadir una pequeña pausa para reducir uso de CPU
   }
 }

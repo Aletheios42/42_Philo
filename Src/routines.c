@@ -25,9 +25,10 @@ bool to_eat(t_philo *philo) {
     pthread_mutex_unlock(&philo->left_fork->mutex);
     pthread_mutex_unlock(&philo->right_fork->mutex);
   }
-  //
+
   // Check if philosopher has eaten enough
-  if (philo->meals_counter >= philo->params->meals_cap) {
+  if (philo->params->meals_cap > 0 &&
+      philo->meals_counter >= philo->params->meals_cap) {
     return true; // Return true if meal cap reached
   }
   return false; // Continue otherwise
