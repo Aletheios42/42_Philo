@@ -16,15 +16,18 @@ bool to_eat(t_philo *philo) {
 
   print_status(philo, "is eating");
   philo->last_meal_time = get_current_time();
-  msleep(philo->params->time_to_eat);
   philo->meals_counter++;
 
-  pthread_mutex_unlock(&philo->right_fork->mutex);
-  pthread_mutex_unlock(&philo->left_fork->mutex);
-
+  if (philo->id % 2 == 1) {
+    pthread_mutex_unlock(&philo->right_fork->mutex);
+    pthread_mutex_unlock(&philo->left_fork->mutex);
+  } else {
+    pthread_mutex_unlock(&philo->left_fork->mutex);
+    pthread_mutex_unlock(&philo->right_fork->mutex);
+  }
+  //
   // Check if philosopher has eaten enough
-  if (philo->params->meals_cap > 0 &&
-      philo->meals_counter >= philo->params->meals_cap) {
+  if (philo->meals_counter >= philo->params->meals_cap) {
     return true; // Return true if meal cap reached
   }
   return false; // Continue otherwise

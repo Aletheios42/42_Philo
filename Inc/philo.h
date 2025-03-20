@@ -34,6 +34,7 @@ typedef struct s_philo {
   pthread_t thread;
   long meals_counter;
   long last_meal_time;
+  long start_time;
   t_fork *left_fork;
   t_fork *right_fork;
   pthread_mutex_t print_mutex;
@@ -58,5 +59,8 @@ void monitor_philos(t_philo *philos, t_input *input, t_end *end);
 
 int check_starvation(t_philo *philos, t_input *input, t_end *end);
 void msleep(long ms);
+void monitor_philos(t_philo *philos, t_input *input, t_end *end);
+
+int check_starvation(t_philo *philos, t_input *input, t_end *end);
 
 #endif

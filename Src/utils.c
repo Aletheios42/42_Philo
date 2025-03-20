@@ -1,5 +1,32 @@
 #include "../Inc/philo.h"
 
+bool parser(t_input *input, char **av, int ac) {
+  input->philosophers = ft_philo_atol(av[1]);
+  if (input->philosophers <= 0)
+    return (false);
+
+  input->time_to_die = ft_philo_atol(av[2]);
+  if (input->time_to_die <= 0)
+    return (false);
+
+  input->time_to_eat = ft_philo_atol(av[3]);
+  if (input->time_to_eat <= 0)
+    return (false);
+
+  input->time_to_sleep = ft_philo_atol(av[4]);
+  if (input->time_to_sleep <= 0)
+    return (false);
+
+  if (ac == 6) {
+    input->meals_cap = ft_philo_atol(av[5]);
+    if (input->meals_cap <= 0)
+      return (false);
+  } else {
+    input->meals_cap = 0;
+  }
+  return (true);
+}
+
 long ft_philo_atol(char *nbr) {
   long result = 0;
   int i = 0;
@@ -38,25 +65,4 @@ void msleep(long ms) {
   while (get_current_time() - start_time < ms) {
     usleep(500); // Sleep for 0.5ms to reduce CPU usage
   }
-}
-
-int check_starvation(t_philo *philos, t_input *input, t_end *end) {
-
-  int i;
-  i = -1;
-  while (++i < input->philosophers) {
-    // Check if philosopher has died
-    if (get_current_time() - philos[i].last_meal_time > input->time_to_die) {
-      // Set simulation end flag
-      pthread_mutex_lock(&(end->end_mutex));
-      end->simulation_end = true;
-      pthread_mutex_unlock(&(end->end_mutex));
-      // Print death status
-      pthread_mutex_lock(&philos[i].print_mutex);
-      printf("%ld %d died\n", get_current_time(), philos[i].id);
-      pthread_mutex_unlock(&philos[i].print_mutex);
-      return 1;
-    }
-  }
-  return 0;
 }

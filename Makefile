@@ -8,6 +8,7 @@ C_FLAGS = -Werror -Wextra -Wall -g3
 
 SRC_FILES = main.c		\
 	    routines.c		\
+	    monitor.c		\
 	    init-free.c		\
 	    print.c		\
 	    utils.c		\

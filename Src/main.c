@@ -1,67 +1,5 @@
 #include "../Inc/philo.h"
 
-void monitor_philos(t_philo *philos, t_input *input, t_end *end) {
-  int i;
-  int full_philos;
-
-  while (1) {
-    // Verificar si algún filósofo murió de hambre
-    if (check_starvation(philos, input, end))
-      return;
-
-    // Solo comprueba si todos han comido lo suficiente si hay un límite de
-    // comidas
-    if (input->meals_cap > 0) {
-      i = 0;
-      full_philos = 0;
-
-      // Recorrer TODOS los filósofos
-      while (i < input->philosophers) {
-        if (philos[i].meals_counter >= input->meals_cap)
-          full_philos++;
-        i++;
-      }
-
-      // Si todos han comido lo suficiente, terminar simulación
-      if (full_philos == input->philosophers) {
-        pthread_mutex_lock(&(end->end_mutex));
-        end->simulation_end = true;
-        pthread_mutex_unlock(&(end->end_mutex));
-        return;
-      }
-    }
-
-    // Pequeña pausa para reducir uso de CPU
-    usleep(100);
-  }
-}
-bool parser(t_input *input, char **av, int ac) {
-  input->philosophers = ft_philo_atol(av[1]);
-  if (input->philosophers <= 0)
-    return (false);
-
-  input->time_to_die = ft_philo_atol(av[2]);
-  if (input->time_to_die <= 0)
-    return (false);
-
-  input->time_to_eat = ft_philo_atol(av[3]);
-  if (input->time_to_eat <= 0)
-    return (false);
-
-  input->time_to_sleep = ft_philo_atol(av[4]);
-  if (input->time_to_sleep <= 0)
-    return (false);
-
-  if (ac == 6) {
-    input->meals_cap = ft_philo_atol(av[5]);
-    if (input->meals_cap <= 0)
-      return (false);
-  } else {
-    input->meals_cap = 0;
-  }
-  return (true);
-}
-
 int main(int ac, char **av) {
   int i;
   t_input input;
@@ -92,8 +30,10 @@ int main(int ac, char **av) {
   // Initialize last_meal_time for all philosophers
   long start_time = get_current_time();
   i = -1;
-  while (++i < input.philosophers)
+  while (++i < input.philosophers) {
     philos[i].last_meal_time = start_time;
+    philos[i].start_time = start_time;
+  }
 
   // Start philosopher threads
   i = -1;
