@@ -49,12 +49,6 @@ bool should_exit(t_philo *philo) {
 void *lifecycle(void *arg) {
   t_philo *philo = (t_philo *)arg;
 
-  // Stagger philosophers to prevent deadlock
-  if (philo->id % 2 != 0) {
-    to_think(philo);
-    msleep(philo->params->time_to_eat / 2);
-  }
-
   while (!should_exit(philo)) {
     if (to_eat(philo)) // Break if meal cap reached
       break;

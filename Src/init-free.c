@@ -64,7 +64,7 @@ void create_philosophers(t_philo **philos, t_fork *forks, t_input *input,
 }
 
 void free_resources(t_philo *philos, t_fork *forks, pthread_mutex_t *print,
-                    int n) {
+                    int nbr_philos) {
   int i;
   t_fork *current;
   t_fork *next;
@@ -77,7 +77,7 @@ void free_resources(t_philo *philos, t_fork *forks, pthread_mutex_t *print,
   if (forks) {
     current = forks;
     i = -1;
-    while (++i < n) {
+    while (++i < nbr_philos) {
       next = current->next;
       pthread_mutex_destroy(&current->mutex);
       free(current);

@@ -1,28 +1,39 @@
 #include "../Inc/philo.h"
 
 void monitor_philos(t_philo *philos, t_input *input, t_end *end) {
-
   int i;
   int full_philos;
 
   while (1) {
-    i = 0;
-    full_philos = 0;
+    // Verificar si algún filósofo murió de hambre
     if (check_starvation(philos, input, end))
       return;
 
-    if (input->meals_cap > 0 && philos[i].meals_counter >= input->meals_cap)
-      full_philos++;
-    i++;
-  }
+    // Solo comprueba si todos han comido lo suficiente si hay un límite de
+    // comidas
+    if (input->meals_cap > 0) {
+      i = 0;
+      full_philos = 0;
 
-  if (input->meals_cap > 0 && full_philos == input->philosophers) {
-    pthread_mutex_lock(&(end->end_mutex));
-    end->simulation_end = true;
-    pthread_mutex_unlock(&(end->end_mutex));
-    return;
+      // Recorrer TODOS los filósofos
+      while (i < input->philosophers) {
+        if (philos[i].meals_counter >= input->meals_cap)
+          full_philos++;
+        i++;
+      }
+
+      // Si todos han comido lo suficiente, terminar simulación
+      if (full_philos == input->philosophers) {
+        pthread_mutex_lock(&(end->end_mutex));
+        end->simulation_end = true;
+        pthread_mutex_unlock(&(end->end_mutex));
+        return;
+      }
+    }
+
+    // Pequeña pausa para reducir uso de CPU
+    usleep(100);
   }
-  usleep(1000);
 }
 bool parser(t_input *input, char **av, int ac) {
   input->philosophers = ft_philo_atol(av[1]);
