@@ -8,7 +8,8 @@ ifeq ($(SANITIZE), 1)
   C_FLAGS += -fsanitize=address
 endif
 
-V_FLAGS = --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose
+V_FLAGS = --tool=memcheck --leak-check=full --show-leak-kinds=all --log-file=logs --track-origins=yes --verbose
+
 
 SRC_FILES = main.c		\
 	    routines.c		\
@@ -38,7 +39,6 @@ gdb:: $(BIN)
 valgrind:: SANITIZE = 0
 valgrind:: $(BIN)
 	@bash -c 'read -p "Enter philo arguments: " args; \
-	echo "Running: valgrind $(V_FLAGS) ./$(BIN) $$args"; \
 	valgrind $(V_FLAGS) ./$(BIN) $$args'
 clean:
 	rm -f $(OBJECTS)

@@ -17,17 +17,13 @@ int main(int ac, char **av) {
   if (!parser(&input, av, ac))
     print_error("Invalid input parameters");
 
-  // Create forks
   create_forks(&forks, input.philosophers);
 
-  // Initialize mutexes
   pthread_mutex_init(&print, NULL);
   pthread_mutex_init(&end.end_mutex, NULL);
 
-  // Create philosophers
   create_philosophers(&philos, forks, &input, &print, &end);
 
-  // Initialize last_meal_time for all philosophers
   long start_time = get_current_time();
   i = -1;
   while (++i < input.philosophers) {
@@ -35,7 +31,6 @@ int main(int ac, char **av) {
     philos[i].start_time = start_time;
   }
 
-  // Start philosopher threads
   i = -1;
   while (++i < input.philosophers) {
     if (pthread_create(&philos[i].thread, NULL, lifecycle, &philos[i]) != 0) {
@@ -43,15 +38,12 @@ int main(int ac, char **av) {
     }
   }
 
-  // Monitor philosophers for death
   monitor_philos(philos, &input, &end);
 
-  // Wait for philosopher threads to finish
   i = -1;
   while (++i < input.philosophers)
     pthread_join(philos[i].thread, NULL);
 
-  // Clean up resources
   free_resources(philos, forks, &print, input.philosophers);
 
   return (0);
