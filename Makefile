@@ -2,13 +2,13 @@ BIN = philo
 BIN_BONUS = philo_bonus
 
 CC = gcc
-C_FLAGS = -Werror -Wextra -Wall -g3
+C_FLAGS = -Werror -Wextra -Wall 
 
 ifeq ($(SANITIZE), 1)
-  C_FLAGS += -fsanitize=address
+  C_FLAGS += -fsanitize=address -g3
 endif
 
-V_FLAGS = --tool=memcheck --leak-check=full --show-leak-kinds=all --log-file=logs --track-origins=yes --verbose
+V_FLAGS = --tool=helgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --log-file=logs --track-origins=yes --verbose
 
 
 SRC_FILES = main.c		\
@@ -32,6 +32,8 @@ bonus: $(BIN_BONUS)
 $(BIN_BONUS): $(SOURCES)
 	$(CC) $(C_FLAGS) $(INCLUDES) $(SOURCES) -o $(BIN_BONUS)
 
+test: $(BIN)
+	python3 philo_checker.py ./$(BIN)
 gdb:: SANITIZE = 1
 gdb:: $(BIN)
 	gdb ./$(BIN)

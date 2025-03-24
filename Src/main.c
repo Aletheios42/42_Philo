@@ -1,4 +1,5 @@
 #include "../Inc/philo.h"
+#include <string.h> // Añadir esta línea para memset
 
 int main(int ac, char **av) {
   int i;
@@ -18,6 +19,8 @@ int main(int ac, char **av) {
     print_error("Invalid input parameters");
 
   create_forks(&forks, input.philosophers);
+
+  memset(&end, 0, sizeof(t_end)); // Inicializa toda la estructura a ceros
 
   pthread_mutex_init(&print, NULL);
   pthread_mutex_init(&end.end_mutex, NULL);

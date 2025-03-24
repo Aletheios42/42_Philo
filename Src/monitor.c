@@ -13,8 +13,8 @@ int check_starvation(t_philo *philos, t_input *input, t_end *end) {
       pthread_mutex_unlock(&(end->end_mutex));
       // Print death status
       pthread_mutex_lock(&philos[i].print_mutex);
-      printf("%ld %d died\n", get_current_time() - philos[i].start_time,
-             philos[i].id);
+      printf("%7ld %4d \033[1;31mdied\033[0m\n",
+             get_current_time() - philos[i].start_time, philos[i].id);
       pthread_mutex_unlock(&philos[i].print_mutex);
       return 1;
     }
@@ -44,6 +44,6 @@ void monitor_philos(t_philo *philos, t_input *input, t_end *end) {
         return;
       }
     }
-    usleep(1000); // Añadir una pequeña pausa para reducir uso de CPU
+    usleep(1000);
   }
 }

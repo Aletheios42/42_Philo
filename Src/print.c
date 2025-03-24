@@ -1,4 +1,3 @@
-
 #include "../Inc/philo.h"
 
 void print_error(const char *error) {
@@ -15,7 +14,7 @@ void print_status(t_philo *philo, const char *status) {
 
   if (!simulation_stopped) {
     pthread_mutex_lock(&philo->print_mutex);
-    printf("%ld %d %s\n", get_current_time() - philo->start_time, philo->id,
+    printf("%7ld %4d %s\n", get_current_time() - philo->start_time, philo->id,
            status);
     pthread_mutex_unlock(&philo->print_mutex);
   }
