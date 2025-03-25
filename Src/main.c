@@ -20,7 +20,7 @@ int main(int ac, char **av) {
 
   create_forks(&forks, input.philosophers);
 
-  memset(&end, 0, sizeof(t_end)); // Inicializa toda la estructura a ceros
+  memset(&end, 0, sizeof(t_end));
 
   pthread_mutex_init(&print, NULL);
   pthread_mutex_init(&end.end_mutex, NULL);
@@ -28,17 +28,25 @@ int main(int ac, char **av) {
   create_philosophers(&philos, forks, &input, &print, &end);
 
   long start_time = get_current_time();
-  i = -1;
-  while (++i < input.philosophers) {
+
+  i = 0;
+  while (i < input.philosophers) {
     philos[i].last_meal_time = start_time;
     philos[i].start_time = start_time;
-  }
-
-  i = -1;
-  while (++i < input.philosophers) {
     if (pthread_create(&philos[i].thread, NULL, lifecycle, &philos[i]) != 0) {
       print_error("Failed to create philosopher thread");
     }
+    i += 2;
+  }
+
+  i = 1;
+  while (i < input.philosophers) {
+    philos[i].last_meal_time = start_time;
+    philos[i].start_time = start_time;
+    if (pthread_create(&philos[i].thread, NULL, lifecycle, &philos[i]) != 0) {
+      print_error("Failed to create philosopher thread");
+    }
+    i += 2;
   }
 
   monitor_philos(philos, &input, &end);
