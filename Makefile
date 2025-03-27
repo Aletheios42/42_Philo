@@ -34,14 +34,16 @@ $(BIN_BONUS): $(SOURCES)
 
 test: $(BIN)
 	python3 philo_checker.py ./$(BIN)
-gdb:: SANITIZE = 1
-gdb:: $(BIN)
+
+gdb: fclean
+	$(MAKE) SANITIZE=1 $(BIN)
 	gdb ./$(BIN)
 
-valgrind:: SANITIZE = 0
-valgrind:: $(BIN)
+valgrind: fclean
+	$(MAKE) SANITIZE=0 $(BIN)
 	@bash -c 'read -p "Enter philo arguments: " args; \
 	valgrind $(V_FLAGS) ./$(BIN) $$args'
+
 clean:
 	rm -f $(OBJECTS)
 

@@ -59,4 +59,9 @@ long get_current_time(void) {
   return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
 }
 
-void msleep(long ms) { usleep(ms * 1000); }
+void msleep(long ms) {
+  long start_time = get_current_time();
+  while (get_current_time() - start_time < ms) {
+    usleep(500); // Sleep for 0.5ms to reduce CPU usage
+  }
+}

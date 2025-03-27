@@ -1,7 +1,7 @@
 #include "../Inc/philo.h"
 
 bool to_eat(t_philo *philo) {
-  if (philo->id % 2 == 1) {
+  if (philo->id % 2 == 0) {
     pthread_mutex_lock(&philo->left_fork->mutex);
     print_status(philo, "has taken a fork");
     pthread_mutex_lock(&philo->right_fork->mutex);
@@ -15,13 +15,11 @@ bool to_eat(t_philo *philo) {
   }
 
   print_status(philo, "is eating");
-  // Check if philosopher has eaten enough
   if (philo->params->meals_cap > 0 &&
       philo->meals_counter >= philo->params->meals_cap) {
-    return true; // Return true if meal cap reached
+    return true;
   }
   philo->last_meal_time = get_current_time();
-  // hay que hacer un sleep con el timepo que come..
   msleep(philo->params->time_to_eat);
   philo->meals_counter++;
 
@@ -32,8 +30,7 @@ bool to_eat(t_philo *philo) {
     pthread_mutex_unlock(&philo->left_fork->mutex);
     pthread_mutex_unlock(&philo->right_fork->mutex);
   }
-
-  return false; // Continue otherwise
+  return false;
 }
 
 void to_sleep(t_philo *philo) {
@@ -56,12 +53,11 @@ void *lifecycle(void *arg) {
   t_philo *philo = (t_philo *)arg;
 
   while (!should_exit(philo)) {
-    if (to_eat(philo)) // Break if meal cap reached
-      break;
+    if (to_eat(philo))
+      return NULL;
 
     to_sleep(philo);
     to_think(philo);
   }
-
   return NULL;
 }
