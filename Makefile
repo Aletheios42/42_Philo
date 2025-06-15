@@ -12,11 +12,11 @@ V_FLAGS = --tool=helgrind --tool=memcheck --leak-check=full --show-leak-kinds=al
 
 
 SRC_FILES = main.c		\
-	    routines.c		\
-	    monitor.c		\
-	    init-free.c		\
-	    print.c		\
-	    utils.c		\
+			routines.c	\
+			monitor.c	\
+			parser.c	\
+			init.c		\
+			utils.c		\
 
 SOURCES = $(addprefix Src/, $(SRC_FILES))
 OBJECTS = $(SOURCES:.c=.o)

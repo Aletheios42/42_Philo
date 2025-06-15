@@ -1,61 +1,52 @@
 #include "../Inc/philo.h"
-#include <string.h> // Añadir esta línea para memset
 
-int main(int ac, char **av) {
-  int i;
-  t_input input;
-  t_philo *philos = NULL;
-  t_fork *forks = NULL;
-  pthread_mutex_t print;
-  t_end end;
 
-  if (ac != 5 && ac != 6) {
-    print_error("Usage: ./philo number_of_philosophers time_to_die time_to_eat "
-                "time_to_sleep [number_of_times_each_philosopher_must_eat]");
-    return (1);
-  }
+void	error_exit(const char *msg)
+{
+	printf(RED "%s" RESET, msg);
+	exit(EXIT_FAILURE);
+}
 
-  if (!parser(&input, av, ac))
-    print_error("Invalid input parameters");
+void	clean_up_all(char *str, t_sim *sim)
+{
+	int	i;
 
-  create_forks(&forks, input.philosophers);
+	if (str)
+	{
+		write(2, str, ft_strlen(str));
+		write(2, "\n", 1);
+	}
+	pthread_mutex_destroy(&sim->write_lock);
+	pthread_mutex_destroy(&sim->meal_lock);
+	pthread_mutex_destroy(&sim->dead_lock);
+	if (sim->forks)
+	{
+		i = 0;
+		while (i < sim->num_of_philos)
+			pthread_mutex_destroy(&sim->forks[i++]);
+		free(sim->forks);
+	}
+	if (sim->philos)
+	{
+		i = 0;
+		while (i < sim->num_of_philos)
+			pthread_mutex_destroy(&sim->philos[i++].mutex);
+		free(sim->philos);
+	}
+}
 
-  memset(&end, 0, sizeof(t_end));
 
-  pthread_mutex_init(&print, NULL);
-  pthread_mutex_init(&end.end_mutex, NULL);
+int	main(int ac, char **av)
+{
+	t_sim	sim;
 
-  create_philosophers(&philos, forks, &input, &print, &end);
-
-  long start_time = get_current_time();
-
-  i = 0;
-  while (i < input.philosophers) {
-    philos[i].last_meal_time = start_time;
-    philos[i].start_time = start_time;
-    if (pthread_create(&philos[i].thread, NULL, lifecycle, &philos[i]) != 0) {
-      print_error("Failed to create philosopher thread");
-    }
-    i += 2;
-  }
-
-  i = 1;
-  while (i < input.philosophers) {
-    philos[i].last_meal_time = start_time;
-    philos[i].start_time = start_time;
-    if (pthread_create(&philos[i].thread, NULL, lifecycle, &philos[i]) != 0) {
-      print_error("Failed to create philosopher thread");
-    }
-    i += 2;
-  }
-
-  monitor_philos(philos, &input, &end);
-
-  i = -1;
-  while (++i < input.philosophers)
-    pthread_join(philos[i].thread, NULL);
-
-  free_resources(philos, forks, &print, input.philosophers);
-
-  return (0);
+	if (ac != 5 && ac != 6)
+		error_exit("Wrong argument count\n");
+	if (parse_data(av, &sim))
+		error_exit("Error: parsing error\n");
+	init_forks(&sim);
+	init_philos(&sim);
+	start_threads(&sim);
+	clean_up_all(NULL, &sim);
+	return (EXIT_SUCCESS);
 }
