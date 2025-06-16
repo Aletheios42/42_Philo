@@ -1,4 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: alepinto <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/15 16:55:39 by alepinto          #+#    #+#             */
+/*   Updated: 2025/06/15 17:06:08 by alepinto         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../Inc/philo.h"
+
+void	assign_forks(t_philo *philo, int index, t_sim *sim)
+{
+	philo->l_fork = &sim->forks[index];
+	philo->r_fork = &sim->forks[(index + 1) % sim->num_of_philos];
+}
 
 void	init_forks(t_sim *sim)
 {

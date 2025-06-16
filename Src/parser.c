@@ -1,18 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parser.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: alepinto <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/15 16:56:42 by alepinto          #+#    #+#             */
+/*   Updated: 2025/06/15 17:01:19 by alepinto         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../Inc/philo.h"
-
-bool	ft_isspace(char c)
-{
-	if ((c >= 9 && c <= 13) || c == 32)
-		return (true);
-	return (false);
-}
-
-bool	ft_is_digit(char c)
-{
-	if (c >= '0' && c <= '9')
-		return (true);
-	return (false);
-}
 
 int	ft_atoi(const char *str)
 {
@@ -47,17 +45,17 @@ static bool	ft_check_argument(char *str)
 	int	i;
 
 	i = 0;
-	while (ft_isspace(str[i]))
+	while (str[i] == ' ')
 		i++;
 	if (str[i] == '+')
 		i++;
-	if (!ft_is_digit(str[i]))
+	if (str[i] < '0' || str[i] > '9')
 		return (false);
 	if (str[i] == '+')
 		i++;
 	while (str[i])
 	{
-		if (!ft_is_digit(str[i]))
+		if (str[i] < '0' || str[i] > '9')
 			return (false);
 		i++;
 	}
@@ -101,4 +99,3 @@ int	parse_data(char **av, t_sim *table)
 	table->start_time = get_current_time_ms();
 	return (0);
 }
-

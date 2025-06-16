@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: alepinto <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/15 16:57:23 by alepinto          #+#    #+#             */
+/*   Updated: 2025/06/15 17:11:18 by alepinto         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PHILO_H
 # define PHILO_H
 
@@ -54,6 +66,9 @@ typedef struct s_sim
 	struct timeval		begin_time;
 }						t_sim;
 
+void					create_threads(t_sim *sim, pthread_t *monitor_thread);
+void					join_threads(t_sim *sim, pthread_t *monitor_thread);
+void					check_and_print_full(t_philo *philo);
 void					error_exit(const char *msg);
 void					clean_up_all(char *str, t_sim *sim);
 bool					ft_isspace(char c);
@@ -82,4 +97,3 @@ int						check_if_all_ate(t_sim *philos);
 void					taken_forks(t_philo *philo);
 
 #endif
-

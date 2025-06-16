@@ -1,5 +1,16 @@
-#include "../Inc/philo.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: alepinto <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/15 16:56:01 by alepinto          #+#    #+#             */
+/*   Updated: 2025/06/15 16:58:18 by alepinto         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
+#include "../Inc/philo.h"
 
 void	error_exit(const char *msg)
 {
@@ -34,7 +45,6 @@ void	clean_up_all(char *str, t_sim *sim)
 		free(sim->philos);
 	}
 }
-
 
 int	main(int ac, char **av)
 {
