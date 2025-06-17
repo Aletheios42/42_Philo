@@ -18,14 +18,16 @@ void	error_exit(const char *msg)
 	exit(EXIT_FAILURE);
 }
 
-void	clean_up_all(char *str, t_sim *sim)
+void	clean_up_all(char *msg, t_sim *sim)
 {
 	int	i;
 
-	if (str)
+	if (msg)
 	{
-		write(2, str, ft_strlen(str));
+        pthread_mutex_lock(&sim->write_lock);
+		write(2, msg, ft_strlen(msg));
 		write(2, "\n", 1);
+        pthread_mutex_unlock(&sim->write_lock);
 	}
 	pthread_mutex_destroy(&sim->write_lock);
 	pthread_mutex_destroy(&sim->meal_lock);

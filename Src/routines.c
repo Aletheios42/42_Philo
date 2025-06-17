@@ -69,7 +69,7 @@ void	*philo_routine(void *arg)
 		return (NULL);
 	}
 	if (philo->id % 2 == 0)
-		ft_usleep(50, philo);
+		ft_usleep(70, philo);
 	while (!philo_has_died(philo))
 	{
 		philo_eat(philo);

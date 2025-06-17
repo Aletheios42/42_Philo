@@ -43,9 +43,11 @@ int	check_death(t_sim *sim)
 		{
 			pthread_mutex_lock(&sim->dead_lock);
 			sim->someone_died = 1;
-			printf(RED "[%ld] %d died 💀\n" RESET, get_current_time_ms()
-				- sim->start_time, sim->philos[i].id);
 			pthread_mutex_unlock(&sim->dead_lock);
+            pthread_mutex_lock(&sim->write_lock);
+            printf(RED "[%ld] %d died 💀\n" RESET, get_current_time_ms()
+                    - sim->start_time, sim->philos[i].id);
+            pthread_mutex_unlock(&sim->write_lock);
 			return (1);
 		}
 		i++;
@@ -84,8 +86,11 @@ int	check_if_all_ate(t_sim *sim)
 		pthread_mutex_lock(&sim->dead_lock);
 		sim->someone_died = 1;
 		pthread_mutex_unlock(&sim->dead_lock);
+
+		pthread_mutex_lock(&sim->write_lock);
 		printf(YELLOW "[%ld] All philosophers are full 🐷🍝😊\n" RESET,
 			get_current_time_ms() - sim->start_time);
+		pthread_mutex_unlock(&sim->write_lock);
 		return (1);
 	}
 	return (0);
@@ -100,7 +105,7 @@ void	*monitor_func(void *arg)
 	{
 		if (check_death(sim) || check_if_all_ate(sim))
 			break ;
-		usleep(1000);
+		usleep(400);
 	}
 	return (NULL);
 }

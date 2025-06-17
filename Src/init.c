@@ -24,9 +24,7 @@ void	init_forks(t_sim *sim)
 
 	sim->forks = malloc(sizeof(pthread_mutex_t) * sim->num_of_philos);
 	if (!sim->forks)
-	{
 		error_exit("Error in the forks\n");
-	}
 	i = 0;
 	while (i < sim->num_of_philos)
 	{
@@ -45,8 +43,8 @@ void	init_philos(t_sim *sim)
 	if (!sim->philos)
 		error_exit("Error: Failed to allocate memory for philosophers\n");
 	sim->start_time = get_current_time_ms();
-	i = 0;
-	while (i < sim->num_of_philos)
+	i = -1;
+	while (++i < sim->num_of_philos)
 	{
 		sim->philos[i].id = i + 1;
 		sim->philos[i].eating = 0;
@@ -55,6 +53,5 @@ void	init_philos(t_sim *sim)
 		sim->philos[i].sim = sim;
 		pthread_mutex_init(&sim->philos[i].mutex, NULL);
 		assign_forks(&sim->philos[i], i, sim);
-		i++;
 	}
 }

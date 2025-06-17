@@ -47,7 +47,7 @@ void	ft_usleep(long time_in_ms, t_philo *philo)
 		now = get_current_time_ms();
 		if ((now - start) >= time_in_ms)
 			break ;
-		usleep(500);
+		usleep(100);
 	}
 }
 

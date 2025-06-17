@@ -31,7 +31,9 @@ void	taken_forks(t_philo *philo)
 	}
 	else
 	{
-		usleep(500);
+        usleep(20);
+        if ((philo->id + 1) % 4) 
+            usleep(50);
 		pthread_mutex_lock(philo->l_fork);
 		print_status(philo, "has taken a fork", CYAN);
 		pthread_mutex_lock(philo->r_fork);
